@@ -1,12 +1,11 @@
 {
-"name": "ROTTED Brain",
-"symbol": "ROTTED",
-"description": "The ultimate supply rotting memecoin on Solana. 10B Supply, 0.25% Tx Tax = 100% automatically burned forever. Features Brainrot Meme Generator with leaderboard rewards and 15% supply vested for mental health support. So the only cure for brainrot is HODL.",
-"image": "https://rotted.meme/rottedbrain.png",
+  "name": "ROTTED Brain",
+  "symbol": "ROTTED",
+  "description": "The ultimate supply rotting memecoin on Solana. 10B Supply, 0.25% Tx Tax = 100% automatically burned forever. Features Brainrot Meme Generator with leaderboard rewards and 15% supply vested for mental health support. So the only cure for brainrot is HODL.",
+  "image": "https://rotted.meme/rottedbrain.png",
   "extensions": {
     "website": "https://rotted.meme",
     "twitter": "https://x.com/ROTTED_on_Sol",
     "telegram": "https://t.me/ROTTED_on_Sol"
   }
 }
-
