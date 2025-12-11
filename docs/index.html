@@ -16,7 +16,7 @@
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Jupiter Plugin Script (Requested: plugin.jup.ag) -->
+  <!-- Jupiter Plugin Script -->
   <script src="https://plugin.jup.ag/plugin-v1.js" data-preload></script>
 
   <script>
@@ -43,17 +43,42 @@
   </script>
   
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+      // 1. Detect the dApp's existing wallet provider (e.g., Phantom, Solflare)
+      // We prioritize window.phantom.solana if available, otherwise window.solana
+      // This allows the Jupiter widget to "Pass Through" to the user's browser extension
+      const getWalletProvider = () => {
+        if ("phantom" in window) {
+          const provider = window.phantom?.solana;
+          if (provider?.isPhantom) {
+            return provider;
+          }
+        }
+        // Fallback to standard window.solana injection
+        return window.solana;
+      };
+
+      const walletProvider = getWalletProvider();
+
+      // Debugging log to verify provider detection
+      if (walletProvider) {
+        console.log("Wallet provider detected:", walletProvider);
+      } else {
+        console.log("No wallet provider detected. Jupiter will use default mode.");
+      }
+
+      // 2. Initialize Jupiter with passThroughWallet
       window.Jupiter.init({
         displayMode: "integrated",
         integratedTargetId: "target-container",
-        // Helius RPC Endpoint to prevent 403 errors
+        // Helius RPC Endpoint
         endpoint: "https://mainnet.helius-rpc.com/?api-key=9f123cbd-5c43-401d-b780-39c7e611b369",
+        // Pass the detected provider here
+        passThroughWallet: walletProvider, 
         formProps: {
           initialAmount: "10000000",
           initialInputMint: "So11111111111111111111111111111111111111112",
           initialOutputMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
-          // FIXED: fixedMint must be the mint address string in V1, not a boolean
           fixedMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
           swapMode: "ExactIn", 
         },
@@ -148,7 +173,7 @@
       </div>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-        <!-- MODIFIED: Button opens modal -->
+        <!-- Button opens modal -->
         <button onclick="openSwapModal()" class="bg-rot hover:bg-rotlight text-black font-meme text-sm md:text-base px-8 py-4 rounded-none border-4 border-rotlight hover:scale-105 transition shadow-[0_0_20px_rgba(255,20,147,0.5)] cursor-pointer">
           APE IN NOW
         </button>
@@ -158,7 +183,6 @@
       </div>
     </div>
     
-    <!-- Plugin Container Removed from here, moved to modal below -->
   </section>
 
   <!-- TOKENOMICS -->
