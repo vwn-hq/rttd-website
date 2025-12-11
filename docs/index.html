@@ -53,8 +53,9 @@
           initialAmount: "10000000",
           initialInputMint: "So11111111111111111111111111111111111111112",
           initialOutputMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
-          fixedMint: true,
-          swapMode: "ExactIn", // Note: plugin-v1 might not support strict swapMode in all versions, but keeping as requested
+          // FIXED: fixedMint must be the mint address string in V1, not a boolean
+          fixedMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
+          swapMode: "ExactIn", 
         },
         branding: {
           name: "ROTTED Brain",
