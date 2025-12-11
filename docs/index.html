@@ -15,8 +15,10 @@
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Attach the loading script in your <head /> -->
-  <script =src"=https://plugin.jup.ag/plugin-v1.js" data-preload></script>
+  
+  <!-- Jupiter Plugin Script (Requested: plugin.jup.ag) -->
+  <script src="https://plugin.jup.ag/plugin-v1.js" data-preload></script>
+
   <script>
     tailwind.config = {
       theme: {
@@ -39,23 +41,28 @@
       },
     }
   </script>
+  
   <script>
-    window.Jupiter.init({
-      displayMode: "integrated",
-      integratedTargetId: "target-container",
-      formProps: {
-        initialAmount: "10000000",
-        initialInputMint: "So11111111111111111111111111111111111111112",
-        initialOutputMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
-        fixedMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
-      },
-      branding: {
-        name: "ROTTED Brain",
-        logoUri:
-          "https://ipfs.io/ipfs/QmXpYXYTAZXMxny2ndZsMdr8e6jjaSRkvc6JDZVozFhxVZ",
-      },
-   });
- </script> 
+    window.addEventListener('DOMContentLoaded', () => {
+      window.Jupiter.init({
+        displayMode: "integrated",
+        integratedTargetId: "target-container",
+        // Helius RPC Endpoint to prevent 403 errors
+        endpoint: "https://mainnet.helius-rpc.com/?api-key=9f123cbd-5c43-401d-b780-39c7e611b369",
+        formProps: {
+          initialAmount: "10000000",
+          initialInputMint: "So11111111111111111111111111111111111111112",
+          initialOutputMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
+          fixedMint: true,
+          swapMode: "ExactIn", // Note: plugin-v1 might not support strict swapMode in all versions, but keeping as requested
+        },
+        branding: {
+          name: "ROTTED Brain",
+          logoUri: "https://ipfs.io/ipfs/QmXpYXYTAZXMxny2ndZsMdr8e6jjaSRkvc6JDZVozFhxVZ",
+        },
+      });
+    });
+  </script> 
 
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -87,6 +94,14 @@
       --jupiter-plugin-interactive: 33, 42, 54;
       --jupiter-plugin-module: 16, 23, 31;
     }
+    
+    /* Container sizing */
+    #target-container {
+        width: 100%;
+        max-width: 400px;
+        height: 568px;
+        margin: 0 auto;
+    }
   </style>
 </head>
 
@@ -101,7 +116,6 @@
     <!-- Floating Image (User Provided) -->
     <div class="relative z-10 mb-10 group">
       <div class="absolute inset-0 bg-rot blur-[100px] opacity-40 group-hover:opacity-60 transition duration-500"></div>
-      <!-- Ensure the image file G1y3GLpbgAA5kz8.png is in the same directory -->
       <img src="rottedbrain.png" onerror="this.src='https://placehold.co/400x400/FF1493/FFFFFF?text=ROTTED+BRAIN'" alt="$ROTTED Brain" class="w-64 h-64 md:w-96 md:h-96 object-contain relative z-10 glitch-hover transform hover:scale-105 transition duration-300" />
     </div>
 
@@ -117,7 +131,7 @@
         $ROTTED is the first memecoin to fully weaponize the 2025 cultural phenomenon of "brainrot" – the pink brain mascot, Oxford Word of the Year, and 500M+ organic impressions – and transform it into one of the most aggressive deflationary flywheels ever launched on Solana. Built on the exact 10 billion total supply meta that produced every single $500M+ memecoin breakout since July 2025, $ROTTED combines nuclear-level supply burns with locked liquidity, real reward-generating products, soulbound achievement NFTs, and a genuine 4-year charity commitment to funding online mental health and digital detox initiatives, positioning itself as the pink brain engine of decentralized meme dominance.
       </div>
 
-      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
         <a href="https://jup.ag/tokens/5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz" class="bg-rot hover:bg-rotlight text-black font-meme text-sm md:text-base px-8 py-4 rounded-none border-4 border-rotlight hover:scale-105 transition shadow-[0_0_20px_rgba(255,20,147,0.5)]">
           APE IN NOW
         </a>
@@ -126,9 +140,11 @@
         </a>
       </div>
     </div>
-    <!-- Prepare a div in your <body> for Plugin to render -->
-    <!-- Adjust the width and height to suit your requirements -->
-    <div id="target-container" style="width: 400px; height: 568px;"></div>
+    
+    <!-- Plugin Render Container -->
+    <div class="relative z-20 w-full flex justify-center pb-10">
+        <div id="target-container"></div>
+    </div>
   </section>
 
   <!-- TOKENOMICS -->
@@ -346,6 +362,6 @@
         © 2025 ROTTED Brain. Not financial advice. DYOR.
       </p>
     </div>
-  </footer>       
+  </footer>        
 </body>
 </html>
