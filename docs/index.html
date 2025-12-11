@@ -43,16 +43,15 @@
   </script>
   
   <script>
-
-      // 2. Initialize Jupiter with passThroughWallet
+    window.addEventListener('DOMContentLoaded', () => {
+      // Initialize Jupiter Terminal V4
+      // This version includes the Unified Wallet Kit internally, allowing users
+      // to select from multiple wallets (Phantom, Solflare, etc.) via a modal.
       window.Jupiter.init({
         displayMode: "integrated",
         integratedTargetId: "target-container",
         // Helius RPC Endpoint
         endpoint: "https://mainnet.helius-rpc.com/?api-key=9f123cbd-5c43-401d-b780-39c7e611b369",
-        // Pass the detected provider here
-        //passThroughWallet: walletProvider, 
-        enableWalletPassthrough: true,
         formProps: {
           initialAmount: "10000000",
           initialInputMint: "So11111111111111111111111111111111111111112",
@@ -60,12 +59,13 @@
           fixedMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
           swapMode: "ExactIn", 
         },
-        branding: {
-          name: "ROTTED Brain",
-          logoUri: "https://ipfs.io/ipfs/QmXpYXYTAZXMxny2ndZsMdr8e6jjaSRkvc6JDZVozFhxVZ",
+        // Styling the internal wallet adapter
+        containerStyles: {
+            borderRadius: '16px',
         },
       });
-  
+    });
+
     // Modal Control Functions
     function openSwapModal() {
       const modal = document.getElementById('swap-modal');
