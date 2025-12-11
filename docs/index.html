@@ -17,7 +17,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   
   <!-- Jupiter Plugin Script -->
-  <script src="https://plugin.jup.ag/plugin-v1.js" data-preload></script>
+  <script src="https://plugin.jup.ag/main-v4.js" data-preload></script>
 
   <script>
     tailwind.config = {
@@ -43,29 +43,6 @@
   </script>
   
   <script>
-    window.addEventListener('DOMContentLoaded', async () => {
-      // 1. Detect the dApp's existing wallet provider (e.g., Phantom, Solflare)
-      // We prioritize window.phantom.solana if available, otherwise window.solana
-      // This allows the Jupiter widget to "Pass Through" to the user's browser extension
-      const getWalletProvider = () => {
-        if ("phantom" in window) {
-          const provider = window.phantom?.solana;
-          if (provider?.isPhantom) {
-            return provider;
-          }
-        }
-        // Fallback to standard window.solana injection
-        return window.solana;
-      };
-
-      const walletProvider = useWallet();
-
-      // Debugging log to verify provider detection
-      if (walletProvider) {
-        console.log("Wallet provider detected:", walletProvider);
-      } else {
-        console.log("No wallet provider detected. Jupiter will use default mode.");
-      }
 
       // 2. Initialize Jupiter with passThroughWallet
       window.Jupiter.init({
@@ -74,7 +51,8 @@
         // Helius RPC Endpoint
         endpoint: "https://mainnet.helius-rpc.com/?api-key=9f123cbd-5c43-401d-b780-39c7e611b369",
         // Pass the detected provider here
-        passThroughWallet: walletProvider, 
+        //passThroughWallet: walletProvider, 
+        enableWalletPassthrough: true,
         formProps: {
           initialAmount: "10000000",
           initialInputMint: "So11111111111111111111111111111111111111112",
