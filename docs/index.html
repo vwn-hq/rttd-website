@@ -63,6 +63,19 @@
         },
       });
     });
+
+    // Modal Control Functions
+    function openSwapModal() {
+      const modal = document.getElementById('swap-modal');
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden'; // Prevent scrolling background
+    }
+
+    function closeSwapModal() {
+      const modal = document.getElementById('swap-modal');
+      modal.classList.add('hidden');
+      document.body.style.overflow = ''; // Restore scrolling
+    }
   </script> 
 
   <style>
@@ -102,6 +115,8 @@
         max-width: 400px;
         height: 568px;
         margin: 0 auto;
+        /* Ensure it fits in modal */
+        transform-origin: top center;
     }
   </style>
 </head>
@@ -133,19 +148,17 @@
       </div>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
-        <a href="https://jup.ag/tokens/5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz" class="bg-rot hover:bg-rotlight text-black font-meme text-sm md:text-base px-8 py-4 rounded-none border-4 border-rotlight hover:scale-105 transition shadow-[0_0_20px_rgba(255,20,147,0.5)]">
+        <!-- MODIFIED: Button opens modal -->
+        <button onclick="openSwapModal()" class="bg-rot hover:bg-rotlight text-black font-meme text-sm md:text-base px-8 py-4 rounded-none border-4 border-rotlight hover:scale-105 transition shadow-[0_0_20px_rgba(255,20,147,0.5)] cursor-pointer">
           APE IN NOW
-        </a>
+        </button>
         <a href="https://t.me/ROTTED_on_Sol" class="bg-transparent border-4 border-white text-white font-meme text-sm md:text-base px-8 py-4 rounded-none hover:bg-white hover:text-black transition">
           GET SUPPORT
         </a>
       </div>
     </div>
     
-    <!-- Plugin Render Container -->
-    <div class="relative z-20 w-full flex justify-center pb-10">
-        <div id="target-container"></div>
-    </div>
+    <!-- Plugin Container Removed from here, moved to modal below -->
   </section>
 
   <!-- TOKENOMICS -->
@@ -363,6 +376,38 @@
         © 2025 ROTTED Brain. Not financial advice. DYOR.
       </p>
     </div>
-  </footer>        
+  </footer>
+  
+  <!-- JUPITER SWAP MODAL -->
+  <div id="swap-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!-- Background backdrop -->
+    <div class="fixed inset-0 bg-void/95 backdrop-blur-sm transition-opacity opacity-100" onclick="closeSwapModal()"></div>
+  
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        
+        <!-- Modal panel -->
+        <div class="relative transform overflow-hidden rounded-2xl bg-black text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-[420px] border border-rot shadow-[0_0_50px_rgba(255,20,147,0.3)]">
+          
+          <!-- Close button -->
+          <div class="absolute right-0 top-0 pr-4 pt-4 z-20">
+            <button type="button" onclick="closeSwapModal()" class="rounded-md bg-black/50 text-gray-400 hover:text-rot focus:outline-none transition">
+              <span class="sr-only">Close</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+  
+          <!-- Widget Container -->
+          <div class="px-4 pb-4 pt-10 sm:p-6 sm:pb-8 flex justify-center bg-void">
+               <!-- Target Container Moved Here -->
+               <div id="target-container"></div> 
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
