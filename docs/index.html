@@ -15,6 +15,8 @@
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Attach the loading script in your <head /> -->
+  <script src='https://plugin.jup.ag/plugin-v1.js'></script>
   <script>
     tailwind.config = {
       theme: {
@@ -37,6 +39,23 @@
       },
     }
   </script>
+  <script>
+  window.Jupiter.init({
+    displayMode: "integrated",
+    integratedTargetId: "target-container",
+    formProps: {
+      initialAmount: "10000000",
+      initialInputMint: "So11111111111111111111111111111111111111112",
+      initialOutputMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
+      fixedMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
+    },
+    branding: {
+      name: "ROTTED Brain",
+      logoUri:
+        "https://ipfs.io/ipfs/QmXpYXYTAZXMxny2ndZsMdr8e6jjaSRkvc6JDZVozFhxVZ",
+    },
+ });
+ </script> 
 
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -57,6 +76,15 @@
       background: rgba(255, 20, 147, 0.05);
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 20, 147, 0.3);
+    }
+    /* CSS Variables - Generated from user color selections */
+    :root {
+      --jupiter-plugin-primary: 242, 133, 215;
+      --jupiter-plugin-background: 0, 0, 0;
+      --jupiter-plugin-primary-text: 232, 249, 255;
+      --jupiter-plugin-warning: 243, 220, 163;
+      --jupiter-plugin-interactive: 33, 42, 54;
+      --jupiter-plugin-module: 16, 23, 31;
     }
   </style>
 </head>
@@ -97,6 +125,9 @@
         </a>
       </div>
     </div>
+    <!-- Prepare a div in your <body> for Plugin to render -->
+    <!-- Adjust the width and height to suit your requirements -->
+    <div id="target-container" style="width: 400px; height: 568px;"></div>
   </section>
 
   <!-- TOKENOMICS -->
@@ -314,7 +345,6 @@
         © 2025 ROTTED Brain. Not financial advice. DYOR.
       </p>
     </div>
-  </footer>
-
+  </footer>       
 </body>
 </html>
