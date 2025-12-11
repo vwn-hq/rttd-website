@@ -16,7 +16,7 @@
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Attach the loading script in your <head /> -->
-  <script src='https://plugin.jup.ag/plugin-v1.js'></script>
+  <script =src"=https://plugin.jup.ag/plugin-v1.js" data-preload></script>
   <script>
     tailwind.config = {
       theme: {
@@ -40,21 +40,21 @@
     }
   </script>
   <script>
-  window.Jupiter.init({
-    displayMode: "integrated",
-    integratedTargetId: "target-container",
-    formProps: {
-      initialAmount: "10000000",
-      initialInputMint: "So11111111111111111111111111111111111111112",
-      initialOutputMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
-      fixedMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
-    },
-    branding: {
-      name: "ROTTED Brain",
-      logoUri:
-        "https://ipfs.io/ipfs/QmXpYXYTAZXMxny2ndZsMdr8e6jjaSRkvc6JDZVozFhxVZ",
-    },
- });
+    window.Jupiter.init({
+      displayMode: "integrated",
+      integratedTargetId: "target-container",
+      formProps: {
+        initialAmount: "10000000",
+        initialInputMint: "So11111111111111111111111111111111111111112",
+        initialOutputMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
+        fixedMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
+      },
+      branding: {
+        name: "ROTTED Brain",
+        logoUri:
+          "https://ipfs.io/ipfs/QmXpYXYTAZXMxny2ndZsMdr8e6jjaSRkvc6JDZVozFhxVZ",
+      },
+   });
  </script> 
 
   <style>
@@ -77,6 +77,7 @@
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 20, 147, 0.3);
     }
+    
     /* CSS Variables - Generated from user color selections */
     :root {
       --jupiter-plugin-primary: 242, 133, 215;
