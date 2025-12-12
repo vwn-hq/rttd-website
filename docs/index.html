@@ -78,6 +78,134 @@
       modal.classList.add('hidden');
       document.body.style.overflow = ''; // Restore scrolling
     }
+
+      // Airdrop Modal
+    function openAirdropModal() {
+      const modal = document.getElementById('airdrop-modal');
+      const btn = document.getElementById('airdrop-action-btn');
+      
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      
+      // Reset state
+      document.getElementById('airdrop-status').innerHTML = 'Connect wallet to check eligibility.';
+      document.getElementById('airdrop-btn-text').innerText = 'CONNECT & CHECK';
+      
+      btn.disabled = false;
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      
+      // CRITICAL: Reset the onclick handler in case it was changed to redirect previously
+      btn.onclick = checkAirdropEligibility;
+    }
+
+    function closeAirdropModal() {
+      const modal = document.getElementById('airdrop-modal');
+      modal.classList.add('hidden');
+      document.body.style.overflow = ''; 
+    }
+
+    // --- AIRDROP LOGIC ---
+    
+    async function checkAirdropEligibility() {
+        const statusEl = document.getElementById('airdrop-status');
+        const btnText = document.getElementById('airdrop-btn-text');
+        const btn = document.getElementById('airdrop-action-btn');
+
+        // 1. Detect Wallet Provider
+        // Checks for standard window.solana injection (Phantom, Solflare, Backpack)
+        const provider = window.solana || window.phantom?.solana;
+
+        if (!provider) {
+            statusEl.innerHTML = '<span class="text-red-500">❌ No wallet found. Please install Phantom or Solflare.</span>';
+            return;
+        }
+
+        try {
+            btnText.innerText = "CONNECTING...";
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // 2. Connect to Wallet
+            const resp = await provider.connect();
+            const walletPubKey = resp.publicKey.toString();
+
+            btnText.innerText = "CHECKING BALANCE...";
+            
+            // 3. Query Helius RPC for Token Balance
+            const rpcUrl = "https://mainnet.helius-rpc.com/?api-key=9f123cbd-5c43-401d-b780-39c7e611b369";
+            const rottedMint = "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz";
+
+            const response = await fetch(rpcUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    jsonrpc: "2.0",
+                    id: "airdrop-check",
+                    method: "getTokenAccountsByOwner",
+                    params: [
+                        walletPubKey,
+                        { mint: rottedMint },
+                        { encoding: "jsonParsed" }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            
+            let balance = 0;
+            if (data.result && data.result.value && data.result.value.length > 0) {
+                // Get UI Amount (human readable) from the first account found
+                balance = data.result.value[0].account.data.parsed.info.tokenAmount.uiAmount;
+            }
+
+            // 4. Validate Logic (Must have >= 100,000 ROTTED)
+            if (balance >= 100000) {
+                statusEl.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="text-green-400 font-bold text-lg">✅ ELIGIBLE!</div>
+                        <div class="text-sm text-gray-300">Balance: ${balance.toLocaleString()} $ROTTED</div>
+                        <div class="text-xs text-gray-500 mt-2">Processing claim...</div>
+                    </div>
+                `;
+                btnText.innerText = "CLAIMING...";
+                
+                // Simulate claim process then enable redirect
+                setTimeout(() => {
+                    statusEl.innerHTML += `<div class="text-rotlight font-bold mt-2 animate-pulse">🎉 AIRDROP CLAIMED!</div>`;
+                    
+                    // UPDATE BUTTON FOR REDIRECT
+                    btnText.innerText = "SUCCESS - FILL FORM";
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    
+                    // Override click handler to redirect
+                    btn.onclick = () => {
+                        window.open("https://forms.gle/vvhFbJg3mF7bahkA6", "_blank");
+                    };
+
+                }, 1500);
+
+            } else {
+                 statusEl.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="text-red-500 font-bold">❌ NOT ELIGIBLE</div>
+                        <div class="text-sm text-gray-300">Your Balance: ${balance.toLocaleString()}</div>
+                        <div class="text-sm text-yellow-400">Required: 100,000 $ROTTED</div>
+                    </div>
+                `;
+                btnText.innerText = "TRY AGAIN";
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+        } catch (err) {
+            console.error("Airdrop Error:", err);
+            statusEl.innerHTML = `<span class="text-red-500">Error: ${err.message}</span>`;
+            btnText.innerText = "RETRY";
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
   </script> 
 
   <style>
@@ -154,6 +282,10 @@
         <button onclick="openSwapModal()" class="bg-rot hover:bg-rotlight text-black font-meme text-sm md:text-base px-8 py-4 rounded-none border-4 border-rotlight hover:scale-105 transition shadow-[0_0_20px_rgba(255,20,147,0.5)] cursor-pointer">
           APE IN NOW
         </button>
+        <!-- NEW BUTTON: Opens Airdrop modal -->
+        <button onclick="openAirdropModal()" class="bg-transparent border-4 border-yellow-400 text-yellow-400 font-meme text-sm md:text-base px-8 py-4 rounded-none hover:bg-yellow-400 hover:text-black transition animate-bounce-crazy">
+           CLAIM AIRDROP
+        </button> 
         <a href="https://t.me/ROTTED_on_Sol" class="bg-transparent border-4 border-white text-white font-meme text-sm md:text-base px-8 py-4 rounded-none hover:bg-white hover:text-black transition">
           GET SUPPORT
         </a>
@@ -405,6 +537,45 @@
           <div class="px-4 pb-4 pt-10 sm:p-6 sm:pb-8 flex justify-center bg-void">
                <!-- Target Container Moved Here -->
                <div id="target-container"></div> 
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- AIRDROP MODAL (New) -->
+  <div id="airdrop-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-void/95 backdrop-blur-sm transition-opacity opacity-100" onclick="closeAirdropModal()"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        
+        <div class="relative rounded-2xl bg-black text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-[420px] border border-yellow-400 shadow-[0_0_50px_rgba(250,204,21,0.3)]">
+          
+          <!-- Close button -->
+          <div class="absolute right-0 top-0 pr-4 pt-4 z-20">
+            <button type="button" onclick="closeAirdropModal()" class="rounded-md bg-black/50 text-gray-400 hover:text-yellow-400 focus:outline-none transition">
+              <span class="sr-only">Close</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+  
+          <!-- Content -->
+          <div class="p-8 flex flex-col items-center justify-center bg-void/90 rounded-2xl">
+              <h3 class="text-2xl font-meme text-yellow-400 mb-6 text-center">AIRDROP CHECKER</h3>
+              
+              <div class="bg-white/5 border border-white/10 p-6 rounded-xl w-full mb-6 text-center" id="airdrop-status">
+                  Connect wallet to check eligibility.
+              </div>
+
+              <div class="text-xs text-gray-500 mb-6 text-center">
+                  Requirement: Must hold at least 100,000 $ROTTED
+              </div>
+              
+              <button id="airdrop-action-btn" onclick="checkAirdropEligibility()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-meme py-4 rounded transition border-b-4 border-yellow-600 active:border-b-0 active:translate-y-1">
+                  <span id="airdrop-btn-text">CONNECT & CHECK</span>
+              </button>
           </div>
         </div>
       </div>
