@@ -78,14 +78,22 @@
     // Airdrop Modal
     function openAirdropModal() {
       const modal = document.getElementById('airdrop-modal');
+      const btn = document.getElementById('airdrop-action-btn');
+      
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
+      
       // Reset state
       document.getElementById('airdrop-status').innerHTML = 'Connect wallet to check eligibility.';
       document.getElementById('airdrop-btn-text').innerText = 'CONNECT & CHECK';
-      document.getElementById('airdrop-action-btn').disabled = false;
-      document.getElementById('airdrop-action-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+      
+      btn.disabled = false;
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      
+      // CRITICAL: Reset the onclick handler in case it was changed to redirect previously
+      btn.onclick = checkAirdropEligibility;
     }
+
     function closeAirdropModal() {
       const modal = document.getElementById('airdrop-modal');
       modal.classList.add('hidden');
@@ -120,7 +128,6 @@
             btnText.innerText = "CHECKING BALANCE...";
             
             // 3. Query Helius RPC for Token Balance
-            // We use the same RPC endpoint defined in the Jupiter init
             const rpcUrl = "https://mainnet.helius-rpc.com/?api-key=9f123cbd-5c43-401d-b780-39c7e611b369";
             const rottedMint = "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz";
 
@@ -158,10 +165,576 @@
                 `;
                 btnText.innerText = "CLAIMING...";
                 
-                // Simulate claim process
+                // Simulate claim process then enable redirect
                 setTimeout(() => {
                     statusEl.innerHTML += `<div class="text-rotlight font-bold mt-2 animate-pulse">🎉 AIRDROP CLAIMED!</div>`;
-                    btnText.innerText = "SUCCESS";
+                    
+                    // UPDATE BUTTON FOR REDIRECT
+                    btnText.innerText = "SUCCESS - FILL FORM";
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    
+                    // Override click handler to redirect
+                    btn.onclick = () => {
+                        window.open("https://forms.gle/vvhFbJg3mF7bahkA6", "_blank");
+                    };
+
+                }, 1500);
+
+            } else {
+                 statusEl.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="text-red-500 font-bold">❌ NOT ELIGIBLE</div>
+                        <div class="text-sm text-gray-300">Your Balance: ${balance.toLocaleString()}</div>
+                        <div class="text-sm text-yellow-400">Required: 100,000 $ROTTED</div>
+                    </div>
+                `;
+                btnText.innerText = "TRY AGAIN";
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+        } catch (err) {
+            console.error("Airdrop Error:", err);
+            statusEl.innerHTML = `<span class="text-red-500">Error: ${err.message}</span>`;
+            btnText.innerText = "RETRY";
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
+  </script> 
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, .font-meme { font-family: 'Press Start 2P', cursive; }
+    
+    @keyframes glitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-3px, 3px); }
+      40% { transform: translate(-3px, -3px); }
+      60% { transform: translate(3px, 3px); }
+      80% { transform: translate(3px, -3px); }
+      100% { transform: translate(0); }
+    }
+    .glitch { animation: glitch 0.3s infinite; }
+    .glitch-hover:hover { animation: glitch 0.2s infinite; }
+    
+    .glass-panel {
+      background: rgba(255, 20, 147, 0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 20, 147, 0.3);
+    }
+    
+    /* CSS Variables - Styling the Jupiter Widget to match theme */
+    :root {
+      --jupiter-bg: #000000;
+      --jupiter-text: #E8F9FF;
+      --jupiter-primary: #F285D7;
+    }
+    
+    /* Container sizing */
+    #target-container {
+        width: 100%;
+        max-width: 400px;
+        min-height: 600px; 
+        margin: 0 auto;
+    }
+    
+    .jup-wallet-modal {
+        z-index: 10000 !important;
+    }
+  </style>
+</head>
+
+<body class="bg-void text-white overflow-x-hidden selection:bg-rot selection:text-white">
+
+  <!-- HERO SECTION -->
+  <section class="min-h-screen flex flex-col items-center justify-center relative py-20 px-4">
+    <!-- Background Noise -->
+    <div class="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-void via-rotdark/20 to-void pointer-events-none"></div>
+    
+    <!-- Floating Image (User Provided) -->
+    <div class="relative z-10 mb-10 group">
+      <div class="absolute inset-0 bg-rot blur-[100px] opacity-40 group-hover:opacity-60 transition duration-500"></div>
+      <img src="rottedbrain.png" onerror="this.src='https://placehold.co/400x400/FF1493/FFFFFF?text=ROTTED+BRAIN'" alt="$ROTTED Brain" class="w-64 h-64 md:w-96 md:h-96 object-contain relative z-10 glitch-hover transform hover:scale-105 transition duration-300" />
+    </div>
+
+    <div class="relative z-10 text-center max-w-5xl">
+      <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-rotlight to-rot tracking-tighter leading-tight">
+        ROTTED Brain ($ROTTED)
+      </h1>
+      <p class="text-xl md:text-2xl mb-8 text-white font-bold tracking-widest uppercase">
+        The OG brainrot memecoin is finally here!
+      </p>
+      
+      <div class="bg-void/80 border border-rot/30 p-6 md:p-8 rounded-xl max-w-3xl mx-auto mb-10 text-gray-300 text-sm md:text-base leading-relaxed text-justify md:text-center">
+        $ROTTED is the first memecoin to fully weaponize the 2025 cultural phenomenon of "brainrot" – the pink brain mascot, Oxford Word of the Year, and 500M+ organic impressions – and transform it into one of the most aggressive deflationary flywheels ever launched on Solana. Built on the exact 10 billion total supply meta that produced every single $500M+ memecoin breakout since July 2025, $ROTTED combines nuclear-level supply burns with locked liquidity, real reward-generating products, soulbound achievement NFTs, and a genuine 4-year charity commitment to funding online mental health and digital detox initiatives, positioning itself as the pink brain engine of decentralized meme dominance.
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+        <!-- Button opens Swap modal -->
+        <button onclick="openSwapModal()" class="bg-rot hover:bg-rotlight text-black font-meme text-sm md:text-base px-8 py-4 rounded-none border-4 border-rotlight hover:scale-105 transition shadow-[0_0_20px_rgba(255,20,147,0.5)] cursor-pointer">
+          APE IN NOW
+        </button>
+        
+        <!-- NEW BUTTON: Opens Airdrop modal -->
+        <button onclick="openAirdropModal()" class="bg-transparent border-4 border-yellow-400 text-yellow-400 font-meme text-sm md:text-base px-8 py-4 rounded-none hover:bg-yellow-400 hover:text-black transition animate-bounce-crazy">
+           CLAIM AIRDROP
+        </button>
+
+        <a href="https://t.me/ROTTED_on_Sol" class="bg-transparent border-4 border-white text-white font-meme text-sm md:text-base px-8 py-4 rounded-none hover:bg-white hover:text-black transition">
+          GET SUPPORT
+        </a>
+      </div>
+    </div>
+    
+  </section>
+
+  <!-- TOKENOMICS -->
+  <section class="py-20 px-4 bg-void border-t border-rot/20">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl md:text-5xl font-meme text-center text-rot mb-16 glitch">CORE MECHANICS & TOKENOMICS<br><span class="text-xl text-white">(FIXED FOREVER)</span></h2>
+      
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="glass-panel p-6 rounded-xl hover:border-rot transition group">
+          <div class="text-rotlight text-4xl mb-4 group-hover:scale-110 transition origin-left">💎</div>
+          <h3 class="text-xl font-bold mb-2">Total Supply</h3>
+          <p class="text-gray-400">10,000,000,000 $ROTTED</p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="glass-panel p-6 rounded-xl hover:border-rot transition group">
+          <div class="text-rotlight text-4xl mb-4 group-hover:scale-110 transition origin-left">🔥</div>
+          <h3 class="text-xl font-bold mb-2">Transaction Tax</h3>
+          <p class="text-gray-400 text-sm">0.25% on every transfer = 100% instantly burned (locked forever). Effectively rotting ~50% of the circulating supply over 5 years.</p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="glass-panel p-6 rounded-xl hover:border-rot transition group">
+          <div class="text-rotlight text-4xl mb-4 group-hover:scale-110 transition origin-left">🔒</div>
+          <h3 class="text-xl font-bold mb-2">Liquidity</h3>
+          <p class="text-gray-400 text-sm">Goal: Lock 60% of supply by constantly adding to pool, immediately burning LP tokens (proof published on-chain).</p>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="glass-panel p-6 rounded-xl hover:border-rot transition group">
+          <div class="text-rotlight text-4xl mb-4 group-hover:scale-110 transition origin-left">⚔️</div>
+          <h3 class="text-xl font-bold mb-2">Marketing War-chest</h3>
+          <p class="text-gray-400 text-sm">15% (5% unlocked at TGE, 10% locked at pool launch: 6-month cliff + 6-month linear).</p>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="glass-panel p-6 rounded-xl hover:border-rot transition group">
+          <div class="text-rotlight text-4xl mb-4 group-hover:scale-110 transition origin-left">👨‍💻</div>
+          <h3 class="text-xl font-bold mb-2">Team & Dev</h3>
+          <p class="text-gray-400 text-sm">10% (locked at pool launch: 12-month cliff + 24-month linear).</p>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="glass-panel p-6 rounded-xl hover:border-rot transition group">
+          <div class="text-rotlight text-4xl mb-4 group-hover:scale-110 transition origin-left">❤️</div>
+          <h3 class="text-xl font-bold mb-2">Charity Vesting</h3>
+          <p class="text-gray-400 text-sm">15% (1.5B tokens, locked: 12-mo cliff + 36-mo linear, quarterly on-chain proof).</p>
+        </div>
+      </div>
+      
+      <div class="mt-8 text-center bg-rot/10 p-4 rounded-lg border border-rot/50">
+        <p class="text-rotlight font-bold"><a href="https://solsale.app/locks/project?token=5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz" target="_blank">>>For lock proof click here<<</a></p>
+        <p class="text-rotlight font-bold">All authorities revoked, contract fully renounced at pool launch – maximum rug-proof structure.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLYWHEEL -->
+  <section class="py-20 px-4 bg-gradient-to-b from-void to-rotdark/20">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-3xl md:text-5xl font-meme text-center mb-12">REVENUE & UTILITY FLYWHEEL</h2>
+      
+      <div class="space-y-8">
+        <!-- Item 1 -->
+        <div class="flex flex-col md:flex-row gap-6 items-start bg-black/50 p-6 rounded-xl border-l-4 border-rot">
+          <div class="bg-rot text-black font-bold p-3 rounded shrink-0">DAPP</div>
+          <div>
+            <h3 class="text-2xl font-bold mb-2">Brainrot Meme Generator</h3>
+            <p class="text-gray-400 mb-2">Initial version live within 30 days of launch.</p>
+            <p class="text-sm text-gray-500">Users pay in $ROTTED (others 10x in SOL) to create instant 15-second videos/memes using Grok-4, Runway Gen-4, ElevenLabs. ~20% of revenue flows to rewards pool.</p>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="flex flex-col md:flex-row gap-6 items-start bg-black/50 p-6 rounded-xl border-l-4 border-rotlight">
+          <div class="bg-rotlight text-black font-bold p-3 rounded shrink-0">NFTs</div>
+          <div>
+            <h3 class="text-2xl font-bold mb-2">Leaderboard + Soulbound NFTs</h3>
+            <p class="text-sm text-gray-500">Weekly/monthly rankings with non-transferable achievement badges. Top users claim from rewards pool, unlock premium filters, voice packs, unique NFT series, or staking boosts.</p>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="flex flex-col md:flex-row gap-6 items-start bg-black/50 p-6 rounded-xl border-l-4 border-purple-500">
+          <div class="bg-purple-500 text-black font-bold p-3 rounded shrink-0">BOT</div>
+          <div>
+            <h3 class="text-2xl font-bold mb-2">Rotted Factory (@ROTTEDBrain_OG)</h3>
+            <p class="text-sm text-gray-500">24/7 AI-generated brainrot content machine posting fresh memes every 30-45 minutes across X, TikTok, Instagram.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section class="py-20 px-4 bg-void">
+    <div class="max-w-4xl mx-auto relative">
+      <h2 class="text-3xl md:text-5xl font-meme text-center text-rot mb-16">LAUNCH & ROADMAP</h2>
+      
+      <!-- Vertical Line -->
+      <div class="absolute left-4 md:left-1/2 h-full w-1 bg-rot/30 top-0 transform -translate-x-1/2 hidden md:block"></div>
+
+      <div class="space-y-12 relative z-10">
+        <!-- Step 1 -->
+        <div class="flex flex-col md:flex-row items-center justify-between w-full">
+          <div class="md:w-5/12 text-right order-1 md:order-1 pr-8 hidden md:block">
+            <h3 class="text-xl font-bold text-rotlight">Launch Phase</h3>
+          </div>
+          <div class="w-8 h-8 bg-rot rounded-full border-4 border-black z-20 order-1 md:order-2"></div>
+          <div class="md:w-5/12 pl-0 md:pl-8 order-2 md:order-3 text-center md:text-left pt-4 md:pt-0">
+            <h3 class="text-xl font-bold text-rotlight md:hidden mb-2">Launch Phase</h3>
+            <p class="text-sm text-gray-400">Initial SOL and ROTTED pool allocation → Meteora DAMMv2 pair → eternal LP token lock/burn, no team tokens in LP.</p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="flex flex-col md:flex-row items-center justify-between w-full">
+          <div class="md:w-5/12 text-right order-1 md:order-1 pr-8 hidden md:block">
+             <p class="text-sm text-gray-400">Discord channel, Dedicated Website, Meme Generator v1 + Leaderboard + 10k TG + 1M X impressions.</p>
+          </div>
+          <div class="w-8 h-8 bg-rot rounded-full border-4 border-black z-20 order-1 md:order-2"></div>
+          <div class="md:w-5/12 pl-0 md:pl-8 order-2 md:order-3 text-center md:text-left pt-4 md:pt-0">
+            <h3 class="text-xl font-bold text-rotlight">Jan 2025</h3>
+            <p class="text-sm text-gray-400 md:hidden">Discord channel, Dedicated Website, Meme Generator v1 + Leaderboard + 10k TG + 1M X impressions.</p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="flex flex-col md:flex-row items-center justify-between w-full">
+          <div class="md:w-5/12 text-right order-1 md:order-1 pr-8 hidden md:block">
+            <h3 class="text-xl font-bold text-rotlight">Feb-Mar 2026</h3>
+          </div>
+          <div class="w-8 h-8 bg-rot rounded-full border-4 border-black z-20 order-1 md:order-2"></div>
+          <div class="md:w-5/12 pl-0 md:pl-8 order-2 md:order-3 text-center md:text-left pt-4 md:pt-0">
+            <h3 class="text-xl font-bold text-rotlight md:hidden mb-2">Feb-Mar 2026</h3>
+            <p class="text-sm text-gray-400">$10-15k weekly TikTok offensive → 50M organic views → first charity donation.</p>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="flex flex-col md:flex-row items-center justify-between w-full">
+          <div class="md:w-5/12 text-right order-1 md:order-1 pr-8 hidden md:block">
+             <p class="text-sm text-gray-400">Mobile app + 100k holders → $100M+ MC.</p>
+          </div>
+          <div class="w-8 h-8 bg-rot rounded-full border-4 border-black z-20 order-1 md:order-2"></div>
+          <div class="md:w-5/12 pl-0 md:pl-8 order-2 md:order-3 text-center md:text-left pt-4 md:pt-0">
+            <h3 class="text-xl font-bold text-rotlight">Apr-Jun 2026</h3>
+            <p class="text-sm text-gray-400 md:hidden">Mobile app + 100k holders → $100M+ MC.</p>
+          </div>
+        </div>
+
+         <!-- Step 5 -->
+         <div class="flex flex-col md:flex-row items-center justify-between w-full">
+          <div class="md:w-5/12 text-right order-1 md:order-1 pr-8 hidden md:block">
+            <h3 class="text-xl font-bold text-rotlight">Jul-Dec 2026</h3>
+          </div>
+          <div class="w-8 h-8 bg-rot rounded-full border-4 border-black z-20 order-1 md:order-2"></div>
+          <div class="md:w-5/12 pl-0 md:pl-8 order-2 md:order-3 text-center md:text-left pt-4 md:pt-0">
+            <h3 class="text-xl font-bold text-rotlight md:hidden mb-2">Jul-Dec 2026</h3>
+            <p class="text-sm text-gray-400">DAO voting (only if >10k holders & >$50M MC met) + major NGO partnerships.</p>
+          </div>
+        </div>
+        
+        <!-- Step 6 -->
+        <div class="flex flex-col md:flex-row items-center justify-between w-full">
+          <div class="md:w-5/12 text-right order-1 md:order-1 pr-8 hidden md:block">
+             <p class="text-sm text-gray-400">$1B+ floor target, potential L2/gaming integrations.</p>
+          </div>
+          <div class="w-8 h-8 bg-rot rounded-full border-4 border-black z-20 order-1 md:order-2"></div>
+          <div class="md:w-5/12 pl-0 md:pl-8 order-2 md:order-3 text-center md:text-left pt-4 md:pt-0">
+            <h3 class="text-xl font-bold text-rotlight">2027+</h3>
+            <p class="text-sm text-gray-400 md:hidden">$1B+ floor target, potential L2/gaming integrations.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- REDEMPTION ARC -->
+  <section class="py-20 px-4 bg-rot/5">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-3xl md:text-6xl font-meme text-rot mb-10">THE REDEMPTION ARC</h2>
+      <div class="bg-black/40 p-8 rounded-2xl border border-rot/20 backdrop-blur-sm">
+        <p class="text-xl md:text-2xl mb-8 font-bold text-white">
+          15% of total supply (equivalent to $75M at $500M MC) vested over 4 years exclusively to verified online mental health and digital detox organizations.
+        </p>
+        <p class="text-gray-400 mb-6 italic">
+          (Community-voted causes post-DAO. Every donation proven on-chain with video impact reports).
+        </p>
+        <div class="w-16 h-1 bg-rot mx-auto mb-6"></div>
+        <p class="text-lg text-gray-300 leading-relaxed">
+          We fully embrace the absurdity of 2025 internet culture, then burn the supply so aggressively that holding $ROTTED becomes the ultimate anti-brainrot flex while literally funding therapy for zoomers rotting their minds to skibidi toilet edits.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="py-12 px-4 bg-black border-t border-gray-800 text-center">
+    <div class="max-w-2xl mx-auto space-y-8">
+      <p class="text-2xl md:text-3xl font-meme text-rotlight animate-pulse">
+        We rot the supply so your brain doesn't have to. 🧠💀
+      </p>
+      <p class="text-gray-500 font-bold uppercase tracking-wider text-sm">
+        Secure your bag before the chart forgets what a down candle looks like.
+      </p>
+      <div class="flex justify-center gap-8 pt-8">
+        <a href="https://x.com/ROTTED_on_Sol" class="text-gray-500 hover:text-rot text-2xl">X</a>
+        <a href="https://t.me/ROTTED_on_Sol" class="text-gray-500 hover:text-rot text-2xl">TG</a>
+        <a href="https://jup.ag/tokens/5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz" class="text-gray-500 hover:text-rot text-2xl">DEX</a>
+      </div>
+      <p class="text-xs text-gray-700 pt-8">
+        © 2025 ROTTED Brain. Not financial advice. DYOR.
+      </p>
+    </div>
+  </footer>
+  
+  <!-- JUPITER SWAP MODAL -->
+  <div id="swap-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-void/95 backdrop-blur-sm transition-opacity opacity-100" onclick="closeSwapModal()"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        <div class="relative rounded-2xl bg-black text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-[420px] border border-rot shadow-[0_0_50px_rgba(255,20,147,0.3)]">
+          <div class="absolute right-0 top-0 pr-4 pt-4 z-20">
+            <button type="button" onclick="closeSwapModal()" class="rounded-md bg-black/50 text-gray-400 hover:text-rot focus:outline-none transition">
+              <span class="sr-only">Close</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div class="px-4 pb-4 pt-10 sm:p-6 sm:pb-8 flex justify-center bg-void">
+               <div id="target-container"></div> 
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AIRDROP MODAL (New) -->
+  <div id="airdrop-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-void/95 backdrop-blur-sm transition-opacity opacity-100" onclick="closeAirdropModal()"></div>
+    <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+      <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+        
+        <div class="relative rounded-2xl bg-black text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-[420px] border border-yellow-400 shadow-[0_0_50px_rgba(250,204,21,0.3)]">
+          
+          <!-- Close button -->
+          <div class="absolute right-0 top-0 pr-4 pt-4 z-20">
+            <button type="button" onclick="closeAirdropModal()" class="rounded-md bg-black/50 text-gray-400 hover:text-yellow-400 focus:outline-none transition">
+              <span class="sr-only">Close</span>
+              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+  
+          <!-- Content -->
+          <div class="p-8 flex flex-col items-center justify-center bg-void/90 rounded-2xl">
+              <h3 class="text-2xl font-meme text-yellow-400 mb-6 text-center">AIRDROP CHECKER</h3>
+              
+              <div class="bg-white/5 border border-white/10 p-6 rounded-xl w-full mb-6 text-center" id="airdrop-status">
+                  Connect wallet to check eligibility.
+              </div><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROTTED Brain ($ROTTED) | The OG Brainrot Memecoin</title>
+  <meta name="description" content="$ROTTED: 10B supply, 0.25% burn tax. The first memecoin to weaponize brainrot culture into a deflationary flywheel on Solana." />
+  <meta property="og:title" content="$ROTTED Brain – Rot or Get Rotted" />
+  <meta property="og:description" content="We rot the supply so your brain doesn't have to. 10B supply. Aggressive deflation. Real charity utility." />
+  <meta property="og:image" content="brainrot.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;700;900&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Jupiter Terminal Script -->
+  <!-- Switched to main-v3.js for maximum stability with Unified Wallet Kit styling -->
+  <script src="https://terminal.jup.ag/main-v3.js" data-preload></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            rot: "#FF1493",
+            rotlight: "#FF69B4",
+            rotdark: "#8B0A50",
+            void: "#050505"
+          },
+          fontFamily: {
+            meme: ['"Press Start 2P"', "cursive"],
+            sans: ['"Inter"', "sans-serif"],
+          },
+          animation: {
+            'spin-slow': 'spin 12s linear infinite',
+            'bounce-crazy': 'bounce 0.5s infinite',
+          }
+        },
+      },
+    }
+  </script>
+  
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // Initialize Jupiter Terminal
+      window.Jupiter.init({
+        displayMode: "integrated",
+        integratedTargetId: "target-container",
+        // Robust RPC Endpoint
+        endpoint: "https://mainnet.helius-rpc.com/?api-key=9f123cbd-5c43-401d-b780-39c7e611b369",
+        formProps: {
+          initialAmount: "10000000",
+          initialInputMint: "So11111111111111111111111111111111111111112",
+          initialOutputMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
+          fixedMint: "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz",
+          swapMode: "ExactIn", 
+        },
+      });
+    });
+
+    // --- MODAL CONTROLS ---
+
+    // Swap Modal
+    function openSwapModal() {
+      const modal = document.getElementById('swap-modal');
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden'; 
+    }
+    function closeSwapModal() {
+      const modal = document.getElementById('swap-modal');
+      modal.classList.add('hidden');
+      document.body.style.overflow = ''; 
+    }
+
+    // Airdrop Modal
+    function openAirdropModal() {
+      const modal = document.getElementById('airdrop-modal');
+      const btn = document.getElementById('airdrop-action-btn');
+      
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      
+      // Reset state
+      document.getElementById('airdrop-status').innerHTML = 'Connect wallet to check eligibility.';
+      document.getElementById('airdrop-btn-text').innerText = 'CONNECT & CHECK';
+      
+      btn.disabled = false;
+      btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      
+      // CRITICAL: Reset the onclick handler in case it was changed to redirect previously
+      btn.onclick = checkAirdropEligibility;
+    }
+
+    function closeAirdropModal() {
+      const modal = document.getElementById('airdrop-modal');
+      modal.classList.add('hidden');
+      document.body.style.overflow = ''; 
+    }
+
+    // --- AIRDROP LOGIC ---
+    
+    async function checkAirdropEligibility() {
+        const statusEl = document.getElementById('airdrop-status');
+        const btnText = document.getElementById('airdrop-btn-text');
+        const btn = document.getElementById('airdrop-action-btn');
+
+        // 1. Detect Wallet Provider
+        // Checks for standard window.solana injection (Phantom, Solflare, Backpack)
+        const provider = window.solana || window.phantom?.solana;
+
+        if (!provider) {
+            statusEl.innerHTML = '<span class="text-red-500">❌ No wallet found. Please install Phantom or Solflare.</span>';
+            return;
+        }
+
+        try {
+            btnText.innerText = "CONNECTING...";
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            // 2. Connect to Wallet
+            const resp = await provider.connect();
+            const walletPubKey = resp.publicKey.toString();
+
+            btnText.innerText = "CHECKING BALANCE...";
+            
+            // 3. Query Helius RPC for Token Balance
+            const rpcUrl = "https://mainnet.helius-rpc.com/?api-key=9f123cbd-5c43-401d-b780-39c7e611b369";
+            const rottedMint = "5txRta7ZXnkzKgE1ri2rpjXQMQ12SotSkpBFtBigRizz";
+
+            const response = await fetch(rpcUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    jsonrpc: "2.0",
+                    id: "airdrop-check",
+                    method: "getTokenAccountsByOwner",
+                    params: [
+                        walletPubKey,
+                        { mint: rottedMint },
+                        { encoding: "jsonParsed" }
+                    ]
+                })
+            });
+
+            const data = await response.json();
+            
+            let balance = 0;
+            if (data.result && data.result.value && data.result.value.length > 0) {
+                // Get UI Amount (human readable) from the first account found
+                balance = data.result.value[0].account.data.parsed.info.tokenAmount.uiAmount;
+            }
+
+            // 4. Validate Logic (Must have >= 100,000 ROTTED)
+            if (balance >= 100000) {
+                statusEl.innerHTML = `
+                    <div class="space-y-2">
+                        <div class="text-green-400 font-bold text-lg">✅ ELIGIBLE!</div>
+                        <div class="text-sm text-gray-300">Balance: ${balance.toLocaleString()} $ROTTED</div>
+                        <div class="text-xs text-gray-500 mt-2">Processing claim...</div>
+                    </div>
+                `;
+                btnText.innerText = "CLAIMING...";
+                
+                // Simulate claim process then enable redirect
+                setTimeout(() => {
+                    statusEl.innerHTML += `<div class="text-rotlight font-bold mt-2 animate-pulse">🎉 AIRDROP CLAIMED!</div>`;
+                    
+                    // UPDATE BUTTON FOR REDIRECT
+                    btnText.innerText = "SUCCESS - FILL FORM";
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    
+                    // Override click handler to redirect
+                    btn.onclick = () => {
+                        window.open("https://forms.gle/vvhFbJg3mF7bahkA6", "_blank");
+                    };
+
                 }, 1500);
 
             } else {
@@ -538,6 +1111,22 @@
               <div class="bg-white/5 border border-white/10 p-6 rounded-xl w-full mb-6 text-center" id="airdrop-status">
                   Connect wallet to check eligibility.
               </div>
+
+              <div class="text-xs text-gray-500 mb-6 text-center">
+                  Requirement: Must hold at least 100,000 $ROTTED
+              </div>
+              
+              <button id="airdrop-action-btn" onclick="checkAirdropEligibility()" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-meme py-4 rounded transition border-b-4 border-yellow-600 active:border-b-0 active:translate-y-1">
+                  <span id="airdrop-btn-text">CONNECT & CHECK</span>
+              </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
 
               <div class="text-xs text-gray-500 mb-6 text-center">
                   Requirement: Must hold at least 100,000 $ROTTED
